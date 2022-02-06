@@ -5,6 +5,9 @@ from docx import Document
 from docx.enum.section import WD_SECTION
 from docx.shared import Pt
 from resume_style import margins
+from docx.oxml.ns import qn
+from docx.shared import Inches
+from docx.enum.text import WD_BREAK
 
 
 def build_header(document, header_data):
@@ -23,7 +26,7 @@ def build_header(document, header_data):
 
   contacts = []
   for contact in header_data["contacts"]:
-    contacts.append(f"{contact['name'].upper()} {contact['value']}")
+    contacts.append(f"{contact['name']} {contact['value']}")
 
   util.format_font("header_title_1", header.add_run(f"{first} ").font)
   util.format_font("header_title_2", header.add_run(last).font)
@@ -43,39 +46,50 @@ def build_footer(document, footer_data):
 
 
 def build_summary(document, summary_data):
-  document.add_heading('SUMMARY')
-  summary = document.add_paragraph(summary_data)
+  document.add_heading('summary'.upper(), 1)
+  summary_paragraph = document.add_paragraph(summary_data)
+  summary_paragraph.paragraph_format.left_indent = Inches(0.25)
 
 
 def build_highlights(document, highlights_data):
   util.insert_columns_section(document, WD_SECTION.CONTINUOUS, 2)
-  document.add_heading(highlights_data["skillset"]["title"].upper())
+  
+  # Skillset
+  document.add_heading(highlights_data["skillset"]["title"].upper(), 2)
   for skill in highlights_data["skillset"]["skills"]:
-    document.add_paragraph(
+    skillset = document.add_paragraph(
       skill,
       style='List Bullet'
     )
 
-  document.add_heading(highlights_data["personal_projects"]["title"].upper())
+  #document.paragraphs[-1].runs[-1].add_break(WD_BREAK.COLUMN)
+  
+
+  # Personal Projects
+  para_break = document.add_heading(highlights_data["personal_projects"]["title"].upper(), 2).insert_paragraph_before()
+  para_break.add_run().add_break(WD_BREAK.COLUMN)
+  para_break.clear()
+  
   for project in highlights_data["personal_projects"]["projects"]:
-    document.add_paragraph(
+    projects = document.add_paragraph(
       f"{project['name']} - {project['url']}\n{project['description']}",
       style='List Bullet'
     )
-
+    projects.paragraph_format.left_indent = Inches(0.25)
+    
 
 def build_roles(document, role_data):
   util.insert_columns_section(document, WD_SECTION.CONTINUOUS, 1)
 
   # Try build the volunteer roles
-  document.add_heading("VOLUNTEER ROLES")
+  document.add_heading("VOLUNTEER ROLES", 1)
   volunteer_role_expression = jmespath.compile("[?type=='volunteer']")
   volunteer_roles = volunteer_role_expression.search(role_data)
   for role in volunteer_roles:
     build_role_positions(document, role)
 
   # Try build the professional roles
-  document.add_heading("PROFESSIONAL ROLES")
+  document.add_heading("PROFESSIONAL ROLES", 1)
   professional_role_expression = jmespath.compile("[?type=='professional']")
   professional_roles = professional_role_expression.search(role_data)
   for role in professional_roles:
@@ -89,23 +103,33 @@ def build_role_positions(document, role_data):
   
   if role_data["organization"]["location"]["type"] == "remote": remote = True
   else: remote = False
-
+  
   for position in role_data["positions"]:
-    pos_start = f"{position['dates']['start']['month']}/{position['dates']['start']['year']}"
-    pos_end = f"{position['dates']['end']['month']}/{position['dates']['end']['year']}"
     pos_title = position["title"]
-
+    pos_start = f"{position['dates']['start']['month']}/{position['dates']['start']['year']}"
+    if (not position['dates']['end'].get("month")) or (not position['dates']['end'].get("year")):
+      pos_end = "Present"
+    else:
+      pos_end = f"{position['dates']['end']['month']}/{position['dates']['end']['year']}"
+    
     position_paragraph = document.add_paragraph()
     position_paragraph.add_run(org_name).bold = True
-    position_paragraph.add_run(f", {org_city}, {org_state} • {pos_start} - {pos_end}\n")
+    if remote: position_paragraph.add_run(f", Remote • {pos_start} - {pos_end}\n")
+    else: position_paragraph.add_run(f", {org_city}, {org_state} • {pos_start} - {pos_end}\n")
     position_paragraph.add_run(pos_title).bold = True
     position_paragraph.paragraph_format.space_after = Pt(1)
-    position_desc = document.add_paragraph(
-      position["accomplishments"]+position["duties"],
-      style='List Bullet'
-    )
-    position_desc.paragraph_format.keep_together = True
-    position_desc.paragraph_format.space_after = Pt(5)
+
+    for item in position["accomplishments"]+position["duties"]:
+      document.add_paragraph(
+        item,
+        style='List Bullet'
+      )
+    
+    last_position = document.paragraphs[-1]
+    last_position.paragraph_format.keep_together = True
+    last_position.paragraph_format.space_after = Pt(5)
+    last_position.paragraph_format.left_indent = Inches(0.25)
+
 
 if __name__ == "__main__":
   # Make sure a data file has been specified.
@@ -119,6 +143,9 @@ if __name__ == "__main__":
   
   # Create the document object
   document = Document()
+
+  # Configure the styles used within the document
+  util.configure_styles(document)
 
   # Try build the header
   header_data = resume_data.get("header")

@@ -1,9 +1,11 @@
+from pydoc import doc
 from docx.enum.section import WD_SECTION
 from resume_style import document_fonts, margins
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 import yaml
-
+from docx.enum.style import WD_STYLE_TYPE
+from docx.shared import Inches
 
 
 def load_resume_data(data_path):
@@ -66,3 +68,35 @@ def insert_horizontal_rule(paragraph):
     bottom.set(qn('w:space'), '1')
     bottom.set(qn('w:color'), 'auto')
     pBdr.append(bottom)
+
+
+def configure_styles(document):
+
+  num_xml = document.part.numbering_part.numbering_definitions._numbering
+  num_1 = num_xml.num_having_numId(1)
+  abstract_id = num_1.abstractNumId.val
+  element = document.part.numbering_part.element.xpath(f"//w:abstractNum[@w:abstractNumId={abstract_id}]/w:lvl/w:rPr")[0]
+  color = OxmlElement('w:color')
+  color.set(qn('w:val'), '2E74B5')
+  element.insert(0,color)
+
+
+  normal_style = document.styles['Normal']
+  format_font("section_content",normal_style.font)
+  normal_style.font.bold = False
+  rFonts = normal_style.element.rPr.rFonts
+  rFonts.set(qn("w:asciiTheme"), "Calibri Light")
+
+
+  style = document.styles['Heading 1']
+  format_font("section_title",style.font)
+  style.font.bold = False
+  rFonts = style.element.rPr.rFonts
+  rFonts.set(qn("w:asciiTheme"), "Calibri Light")
+
+
+  style = document.styles['Heading 2']
+  format_font("sub_section_title",style.font)
+  style.font.bold = False
+  rFonts = style.element.rPr.rFonts
+  rFonts.set(qn("w:asciiTheme"), "Calibri Light")
