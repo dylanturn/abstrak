@@ -1,0 +1,110 @@
+---
+# Styles
+
+# I dont know why this one gets to be hex, I'm sorry...
+bullet_color_hex: 2E74B5
+
+styles:
+
+  # Styles used throughout the document.
+  normal:
+    style_name: Normal
+    style_type: paragraph
+    font_name: Calibri Light
+    color: [59, 56, 56]
+    size: 10
+    bold: false
+    italic: false
+    underline: false
+    all_caps: false
+    small_caps: false
+    subscript: false
+    superscript: false
+    no_proof: false
+
+  normal_accent:
+    style_name: Normal Accent
+    style_type: character
+    color: [46, 116, 181]
+    base_style: normal
+
+  normal_emphasis:
+    style_name: Normal Emphasis
+    style_type: character
+    bold: true
+    base_style: normal
+
+  normal_accent_emphasis:
+    style_name: Normal Accent Emphasis
+    style_type: character
+    bold: true
+    base_style: normal_accent
+
+  heading_1:
+    style_name: Heading 1
+    all_caps: true
+    base_style: normal_accent
+
+  heading_2:
+    style_name: Heading 2
+    all_caps: true
+    base_style: normal_accent
+
+  # Styles used in the header.
+  title:
+    style_name: Abstrak Title
+    style_type: character
+    font_name: Segoe UI Symbol
+    size: 36
+    base_style: normal
+
+  title_accent:
+    style_name: Abstrak Title Accent
+    style_type: character
+    font_name: Segoe UI Symbol
+    size: 36
+    bold: true
+    base_style: normal_accent
+
+  subtitle:
+    style_name: Abstrak Subtitle
+    style_type: character
+    size: 10
+    base_style: title
+
+  subtitle_emphasis:
+    style_name: Abstrak Subtitle Emphasis
+    style_type: character
+    bold: true
+    size: 10
+    base_style: title
+
+  subtitle_seperator:
+    style_name: Abstrak Subtitle Seperator
+    style_type: character
+    size: 10
+    base_style: normal_accent
+
+  # Styles used with job roles
+
+  position_title:
+    style_name: Abstrak Position Title
+    color: [59, 56, 56]
+    style_type: paragraph
+    all_caps: false
+    small_caps: true
+    bold: true
+    base_style: heading_2
+
+  position_subtitle:
+    style_name: Abstrak Position Subtitle
+    style_type: character
+    font_name: Calibri Regular
+    size: 10
+    base_style: normal
+
+  position_subtitle_seperator:
+    style_name: Abstrak Position Subtitle Seperator
+    style_type: character
+    size: 10
+    base_style: normal_accent

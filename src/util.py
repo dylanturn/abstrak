@@ -1,50 +1,46 @@
 from pydoc import doc
+import docx
 from docx.enum.section import WD_SECTION
-from resume_style import document_fonts, margins
+from resume_style import margins
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 import yaml
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Inches
-
+from docx.shared import RGBColor
+from docx.shared import Pt
+from docx.enum.dml import MSO_THEME_COLOR_INDEX
 
 def load_resume_data(data_path):
   with open(data_path, 'r') as stream:
       return yaml.safe_load(stream)
 
-def get_font_style_attribute(style_name, attribute_name):
-  style = document_fonts.get(style_name, document_fonts.get("default"))
-  if style:
-    return style.get(attribute_name, document_fonts.get("default").get(attribute_name))
-  raise Exception(f"Failed to get attribute {attribute_name} for either the default or {style_name} styles")
+#def get_font_style_attribute(style_name, attribute_name):
+#  style = document_fonts.get(style_name, document_fonts.get("default"))
+#  if style:
+#    return style.get(attribute_name, document_fonts.get("default").get(attribute_name))
+#  raise Exception(f"Failed to get attribute {attribute_name} for either the default or {style_name} styles")
 
 
-def format_font(style, font):
-  font.name = get_font_style_attribute(style, "name")
-  font.size = get_font_style_attribute(style, "size")
-  font.color.rgb = get_font_style_attribute(style, "color")
-  return font
+# def format_font(style, font):
+#   font.name = get_font_style_attribute(style, "name")
+#   font.size = get_font_style_attribute(style, "size")
+#   font.color.rgb = get_font_style_attribute(style, "color")
+#   return font
 
 
-def insert_standard_section(document, start_type):
+def insert_standard_section(document):
   section = document.add_section(WD_SECTION.CONTINUOUS)
-  section.start_type = start_type
-  section.top_margin = margins.get("top")
-  section.right_margin = margins.get("right")
-  section.bottom_margin = margins.get("bottom")
-  section.left_margin = margins.get("left")
+  section.start_type = WD_SECTION.CONTINUOUS
+  cols = section._sectPr.xpath('./w:cols')[0]
+  cols.set(qn('w:num'),str(1))
   return section
 
 
-def insert_columns_section(document, start_type, column_count):
+def insert_columns_section(document, column_count):
   section = document.add_section(WD_SECTION.NEW_COLUMN)
-  section.start_type = start_type
-  section.top_margin = margins.get("top")
-  section.right_margin = margins.get("right")
-  section.bottom_margin = margins.get("bottom")
-  section.left_margin = margins.get("left")
-  sectPr = section._sectPr
-  cols = sectPr.xpath('./w:cols')[0]
+  section.start_type = WD_SECTION.CONTINUOUS
+  cols = section._sectPr.xpath('./w:cols')[0]
   cols.set(qn('w:num'),str(column_count))
   return section
 
@@ -66,37 +62,60 @@ def insert_horizontal_rule(paragraph):
     bottom.set(qn('w:val'), 'dotted')
     bottom.set(qn('w:sz'), '24')
     bottom.set(qn('w:space'), '1')
-    bottom.set(qn('w:color'), 'auto')
+    bottom.set(qn('w:color'), '808080')
     pBdr.append(bottom)
 
 
-def configure_styles(document):
+def create_element(name):
+    return OxmlElement(name)
 
-  num_xml = document.part.numbering_part.numbering_definitions._numbering
-  num_1 = num_xml.num_having_numId(1)
-  abstract_id = num_1.abstractNumId.val
-  element = document.part.numbering_part.element.xpath(f"//w:abstractNum[@w:abstractNumId={abstract_id}]/w:lvl/w:rPr")[0]
-  color = OxmlElement('w:color')
-  color.set(qn('w:val'), '2E74B5')
-  element.insert(0,color)
+def create_attribute(element, name, value):
+    element.set(qn(name), value)
+
+def add_page_number(run, type="PAGE", style=None):
+    fldChar1 = create_element('w:fldChar')
+    create_attribute(fldChar1, 'w:fldCharType', 'begin')
+
+    instrText = create_element('w:instrText')
+    create_attribute(instrText, 'xml:space', 'preserve')
+    instrText.text = type
+
+    fldChar2 = create_element('w:fldChar')
+    create_attribute(fldChar2, 'w:fldCharType', 'end')
+
+    run._r.append(fldChar1)
+    run._r.append(instrText)
+    run._r.append(fldChar2)
+
+    run.style = style
 
 
-  normal_style = document.styles['Normal']
-  format_font("section_content",normal_style.font)
-  normal_style.font.bold = False
-  rFonts = normal_style.element.rPr.rFonts
-  rFonts.set(qn("w:asciiTheme"), "Calibri Light")
 
+def add_hyperlink(paragraph, text, url):
+    # This gets access to the document.xml.rels file and gets a new relation id value
+    part = paragraph.part
+    r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
 
-  style = document.styles['Heading 1']
-  format_font("section_title",style.font)
-  style.font.bold = False
-  rFonts = style.element.rPr.rFonts
-  rFonts.set(qn("w:asciiTheme"), "Calibri Light")
+    # Create the w:hyperlink tag and add needed values
+    hyperlink = docx.oxml.shared.OxmlElement('w:hyperlink')
+    hyperlink.set(docx.oxml.shared.qn('r:id'), r_id, )
 
+    # Create a w:r element and a new w:rPr element
+    new_run = docx.oxml.shared.OxmlElement('w:r')
+    rPr = docx.oxml.shared.OxmlElement('w:rPr')
 
-  style = document.styles['Heading 2']
-  format_font("sub_section_title",style.font)
-  style.font.bold = False
-  rFonts = style.element.rPr.rFonts
-  rFonts.set(qn("w:asciiTheme"), "Calibri Light")
+    # Join all the xml elements together add add the required text to the w:r element
+    new_run.append(rPr)
+    new_run.text = text
+    hyperlink.append(new_run)
+
+    # Create a new Run object and add the hyperlink into it
+    r = paragraph.add_run ()
+    r._r.append (hyperlink)
+
+    # A workaround for the lack of a hyperlink style (doesn't go purple after using the link)
+    # Delete this if using a template that has the hyperlink style in it
+    r.font.color.theme_color = MSO_THEME_COLOR_INDEX.HYPERLINK
+    r.font.underline = True
+
+    return hyperlink

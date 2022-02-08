@@ -1,15 +1,21 @@
+from operator import truediv
 import sys
 import util
 import jmespath
 from docx import Document
 from docx.enum.section import WD_SECTION
+from docx.enum.text import WD_TAB_ALIGNMENT
 from docx.shared import Pt
-from resume_style import margins
+from resume_style import margins, AbstrakStyle
 from docx.oxml.ns import qn
 from docx.shared import Inches
 from docx.enum.text import WD_BREAK
+from docx.text.paragraph import Run
 
 
+####################
+###    HEADER    ###
+####################
 def build_header(document, header_data):
   default_section = document.sections[0]
   header = default_section.header.paragraphs[0]
@@ -24,72 +30,111 @@ def build_header(document, header_data):
   state = header_data["location"]["state"]
   zip = header_data["location"]["zip"]
 
-  contacts = []
-  for contact in header_data["contacts"]:
-    contacts.append(f"{contact['name']} {contact['value']}")
+  #####
+  # HEADER TITLE
+  #####
+  header.add_run(f"{first} ", style="Abstrak Title")
+  header.add_run(f"{last}\n", style="Abstrak Title Accent")
 
-  util.format_font("header_title_1", header.add_run(f"{first} ").font)
-  util.format_font("header_title_2", header.add_run(last).font)
-  util.format_font("header_subtitle", header.add_run(f"\n{city} • {state} • {zip}").font)
-  util.format_font("header_subtitle", header.add_run(f"\n{' • '.join(contacts)}").font)
+  #####
+  # HEADER LOCATION
+  #####
+  header.add_run(city, style="Abstrak Subtitle")
+  header.add_run(" • ", style="Abstrak Subtitle Seperator")
+  header.add_run(state, style="Abstrak Subtitle")
+  header.add_run(" • ", style="Abstrak Subtitle Seperator")
+  header.add_run(f"{zip}\n", style="Abstrak Subtitle")
+  
+  #####
+  # CONTACT INFO
+  #####
+  build_contacts(header, header_data["contacts"])
+  header.add_run("\n")
+  
+  return header
 
 
+####################
+###    FOOTER    ###
+####################
 def build_footer(document, footer_data):
   default_section = document.sections[0]
-  footer = default_section.footer.paragraphs[0]
+  footer_paragraph = default_section.footer.paragraphs[0]
+  build_contacts(footer_paragraph, footer_data["contacts"])
+  footer_paragraph.add_run("\t\t")
+  util.add_page_number(footer_paragraph.add_run(), style=document.styles["Normal Accent Emphasis"])
+  footer_paragraph.add_run("|")
+  util.add_page_number(footer_paragraph.add_run(), "NUMPAGES")
+  footer_tab_stops = footer_paragraph.paragraph_format.tab_stops
+  footer_tab_stops.add_tab_stop(Inches(0), WD_TAB_ALIGNMENT.LEFT)
+  footer_tab_stops.add_tab_stop(Inches(7.5), WD_TAB_ALIGNMENT.RIGHT)
 
-  contacts = []
-  for contact in footer_data["contacts"]:
-    contacts.append(f"{contact['name'].upper()} {contact['value']}")
-
-  util.format_font("header_subtitle", footer.add_run(f"\n{' • '.join(contacts)}").font)
 
 
+
+# Builds the contact methods in a consistent way for the header and footer.
+def build_contacts(paragraph, contacts):
+  paragraph.add_run(f"{contacts[0]['name']} ", style="Abstrak Subtitle Emphasis")
+  paragraph.add_run(contacts[0]["value"], style="Abstrak Subtitle")
+  paragraph.add_run(" • ", style="Abstrak Subtitle Seperator")
+
+  for idx in range(1, len(contacts)-1):
+    paragraph.add_run(f"{contacts[idx]['name']} ", style="Abstrak Subtitle Emphasis")
+    paragraph.add_run(f"{contacts[idx]['value']}", style="Abstrak Subtitle")
+    paragraph.add_run(" • ", style="Abstrak Subtitle Seperator")
+    
+  paragraph.add_run(f"{contacts[-1]['name']} ", style="Abstrak Subtitle Emphasis")
+  paragraph.add_run(f"{contacts[-1]['value']}", style="Abstrak Subtitle")
+
+
+#####################
+###    SUMMARY    ###
+#####################
 def build_summary(document, summary_data):
-  document.add_heading('summary'.upper(), 1)
-  summary_paragraph = document.add_paragraph(summary_data)
-  summary_paragraph.paragraph_format.left_indent = Inches(0.25)
+  document.add_paragraph("summary", style="Heading 1")
+  document.add_paragraph(summary_data)
 
 
+########################
+###    HIGHLIGHTS    ###
+########################
 def build_highlights(document, highlights_data):
-  util.insert_columns_section(document, WD_SECTION.CONTINUOUS, 2)
-  
+
   # Skillset
-  document.add_heading(highlights_data["skillset"]["title"].upper(), 2)
+  document.add_paragraph(highlights_data["skillset"]["title"], style="Heading 2")
   for skill in highlights_data["skillset"]["skills"]:
-    skillset = document.add_paragraph(
+    document.add_paragraph(
       skill,
       style='List Bullet'
     )
 
-  #document.paragraphs[-1].runs[-1].add_break(WD_BREAK.COLUMN)
-  
-
   # Personal Projects
-  para_break = document.add_heading(highlights_data["personal_projects"]["title"].upper(), 2).insert_paragraph_before()
+  para_break = document.add_paragraph(highlights_data["personal_projects"]["title"], style="Heading 2").insert_paragraph_before()
   para_break.add_run().add_break(WD_BREAK.COLUMN)
   para_break.clear()
-  
   for project in highlights_data["personal_projects"]["projects"]:
-    projects = document.add_paragraph(
-      f"{project['name']} - {project['url']}\n{project['description']}",
+    project_paragraph = document.add_paragraph(
+      #f"{project['name']} - {project['url']}",
       style='List Bullet'
     )
-    projects.paragraph_format.left_indent = Inches(0.25)
-    
+    util.add_hyperlink(project_paragraph, project['name'], project['url'])
+    project_paragraph.add_run(f" - {project['description']}")
 
+
+###################
+###    ROLES    ###
+###################
 def build_roles(document, role_data):
-  util.insert_columns_section(document, WD_SECTION.CONTINUOUS, 1)
-
+  
   # Try build the volunteer roles
-  document.add_heading("VOLUNTEER ROLES", 1)
+  document.add_paragraph("volunteer work", style="Heading 1")
   volunteer_role_expression = jmespath.compile("[?type=='volunteer']")
   volunteer_roles = volunteer_role_expression.search(role_data)
   for role in volunteer_roles:
     build_role_positions(document, role)
 
   # Try build the professional roles
-  document.add_heading("PROFESSIONAL ROLES", 1)
+  document.add_paragraph("experience", style="Heading 1")
   professional_role_expression = jmespath.compile("[?type=='professional']")
   professional_roles = professional_role_expression.search(role_data)
   for role in professional_roles:
@@ -97,13 +142,12 @@ def build_roles(document, role_data):
 
 
 def build_role_positions(document, role_data):
+  # Get the role org and location information
   org_name = role_data["organization"]["name"]
   org_city = role_data["organization"]["location"]["city"]
   org_state = role_data["organization"]["location"]["state"]
   
-  if role_data["organization"]["location"]["type"] == "remote": remote = True
-  else: remote = False
-  
+  # Get the information for each position in each role
   for position in role_data["positions"]:
     pos_title = position["title"]
     pos_start = f"{position['dates']['start']['month']}/{position['dates']['start']['year']}"
@@ -111,14 +155,23 @@ def build_role_positions(document, role_data):
       pos_end = "Present"
     else:
       pos_end = f"{position['dates']['end']['month']}/{position['dates']['end']['year']}"
-    
-    position_paragraph = document.add_paragraph()
-    position_paragraph.add_run(org_name).bold = True
-    if remote: position_paragraph.add_run(f", Remote • {pos_start} - {pos_end}\n")
-    else: position_paragraph.add_run(f", {org_city}, {org_state} • {pos_start} - {pos_end}\n")
-    position_paragraph.add_run(pos_title).bold = True
-    position_paragraph.paragraph_format.space_after = Pt(1)
+    if role_data["organization"]["location"]["type"] == "remote":
+      pos_location = "Remote"
+    else:
+      pos_location = f"{org_city}, {org_state}"
 
+    # Position Title
+    document.add_paragraph(pos_title, style="Abstrak Position Title")
+
+    # Position Company, State, Dates
+    position_paragraph = document.add_paragraph()
+    position_paragraph.add_run(org_name, style="Abstrak Position Subtitle")
+    position_paragraph.add_run(f", {pos_location}", style="Abstrak Position Subtitle")
+    position_paragraph.add_run(" • ", style="Abstrak Position Subtitle Seperator")
+    position_paragraph.add_run(f"{pos_start} - {pos_end}", style="Abstrak Position Subtitle")
+
+    position_paragraph.paragraph_format.space_after = Pt(1)
+    # Position Responsibilitites with acomplishments first
     for item in position["accomplishments"]+position["duties"]:
       document.add_paragraph(
         item,
@@ -128,7 +181,6 @@ def build_role_positions(document, role_data):
     last_position = document.paragraphs[-1]
     last_position.paragraph_format.keep_together = True
     last_position.paragraph_format.space_after = Pt(5)
-    last_position.paragraph_format.left_indent = Inches(0.25)
 
 
 if __name__ == "__main__":
@@ -145,13 +197,15 @@ if __name__ == "__main__":
   document = Document()
 
   # Configure the styles used within the document
-  util.configure_styles(document)
+  AbstrakStyle(document)
 
   # Try build the header
   header_data = resume_data.get("header")
   if header_data is None:
     raise Exception("No header found!")
-  build_header(document, header_data)
+  header = build_header(document, header_data)
+
+  #util.insert_horizontal_rule(header)
 
   # Try build the summary
   summary_data = resume_data.get("summary")
@@ -159,11 +213,16 @@ if __name__ == "__main__":
     raise Exception("No summary found!")
   build_summary(document, summary_data)
   
+  util.insert_columns_section(document, 2)
+
   # Try build the highlights
   highlights_data = resume_data.get("highlights")
   if highlights_data is None:
     raise Exception("No highlights found!")
   build_highlights(document, highlights_data)
+
+  util.insert_standard_section(document)
+  #util.insert_horizontal_rule(document.add_paragraph())
 
   # Try build the roles
   roles_data = resume_data.get("roles")
