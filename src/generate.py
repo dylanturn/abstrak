@@ -121,6 +121,9 @@ def build_highlights(document, highlights_data):
       style='List Bullet'
     )
 
+  last_position = document.paragraphs[-1]
+  last_position.style = 'Abstrak Position List Bullet Last'
+
   # Personal Projects
   document.add_paragraph(highlights_data["personal_projects"]["title"], style="Heading 2")
   for project in highlights_data["personal_projects"]["projects"]:
@@ -130,6 +133,8 @@ def build_highlights(document, highlights_data):
     util.add_hyperlink(project_paragraph, project['name'], project['url'])
     project_paragraph.add_run(f" - {project['description']}")
 
+  last_position = document.paragraphs[-1]
+  last_position.style = 'Abstrak Position List Bullet Last'
 
 ###################
 ###    ROLES    ###
@@ -142,6 +147,8 @@ def build_roles(document, role_data):
   volunteer_roles = volunteer_role_expression.search(role_data)
   for role in volunteer_roles:
     build_role_positions(document, role)
+
+  util.insert_standard_section(document)
 
   # Try build the professional roles
   document.add_paragraph("experience", style="Heading 1")
@@ -189,7 +196,8 @@ def build_role_positions(document, role_data):
       )
     
     last_position = document.paragraphs[-1]
-    last_position.paragraph_format.keep_together = True
+    last_position.style = 'Abstrak Position List Bullet Last'
+    #last_position.paragraph_format.keep_together = True
     #last_position.paragraph_format.space_after = Pt(5)
 
 

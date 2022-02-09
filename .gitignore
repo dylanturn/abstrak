@@ -1,6 +1,7 @@
 # Temporary
 resume-data.yml
 resume-style.yml
+resume-data-trim.yml
 
 *.ps
 *.pdf

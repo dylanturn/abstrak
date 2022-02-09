@@ -74,6 +74,7 @@ class AbstrakStyle:
     doc_style.paragraph_format.space_before = Pt(self._get_attribute(style, "space_before"))
     doc_style.paragraph_format.space_after = Pt(self._get_attribute(style, "space_after"))
     doc_style.paragraph_format.keep_together = self._get_attribute(style, "keep_together")
+    doc_style.paragraph_format.keep_with_next = self._get_attribute(style, "keep_with_next")
 
   def load_style(self, document, style):
     # Try get the style, if it doesn't exist we'll make a new one

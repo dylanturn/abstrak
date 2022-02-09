@@ -34,6 +34,7 @@ styles:
     space_after: 0
     contextual_spacing: true
     keep_together: true
+    keep_with_next: true
 
   normal_accent:
     style_name: Normal Accent
@@ -119,7 +120,7 @@ styles:
 
   position_title:
     style_name: Abstrak Position Title
-    font_name: Calibri
+    font_name: Calibri Regular
     color: base
     style_type: paragraph
     all_caps: true
@@ -127,13 +128,15 @@ styles:
     bold: true
     space_before: 8
     space_after: 0
+    keep_with_next: true
     base_style: heading_2
 
   position_subtitle:
     style_name: Abstrak Position Subtitle
     style_type: character
+    font_name: Calibri Regular
     size: 11
-    base_style: position_title
+    base_style: normal
 
   position_subtitle_seperator:
     style_name: Abstrak Position Subtitle Seperator
@@ -144,6 +147,14 @@ styles:
   position_list_bullet:
     style_name: Abstrak Position List Bullet
     contextual_spacing: false
+    space_before: 3
+    space_after: 3
+    base_style: list_bullet
+  
+  position_list_bullet_last:
+    style_name: Abstrak Position List Bullet Last
+    contextual_spacing: false
+    keep_with_next: false
     space_before: 3
     space_after: 3
     base_style: list_bullet
