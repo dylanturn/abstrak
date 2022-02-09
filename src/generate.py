@@ -171,7 +171,7 @@ def build_role_positions(document, role_data):
     for item in position["accomplishments"]+position["duties"]:
       document.add_paragraph(
         item,
-        style='List Bullet'
+        style='Abstrak Position List Bullet'
       )
     
     last_position = document.paragraphs[-1]
@@ -183,7 +183,7 @@ if __name__ == "__main__":
   # Make sure a data file has been specified.
   # TODO: Maybe use something like Click for input args
   if(len(sys.argv) == 1):
-    print("Please specify a data file")
+    print("Please specify a data and style file")
     sys.exit(2)
 
   # Get the resume data
@@ -193,7 +193,7 @@ if __name__ == "__main__":
   document = Document()
 
   # Configure the styles used within the document
-  AbstrakStyle(document)
+  AbstrakStyle(document, style_path=sys.argv[2])
 
   # Try build the header
   header_data = resume_data.get("header")
@@ -230,5 +230,8 @@ if __name__ == "__main__":
   build_footer(document, footer_data)
 
   # Save the resume
-  # TODO: Make the name configurable
-  document.save("resume.docx")
+  save_file_name = "resume.docx"
+  if sys.argv[3]:
+    save_file_name = sys.argv[3]
+
+  document.save(save_file_name)

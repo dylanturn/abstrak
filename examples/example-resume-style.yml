@@ -8,8 +8,8 @@ page_margins:
   right: 0.5
 
 colors:
-  base: [59, 56, 56]
-  accent: [46, 116, 181]
+  base: [85, 85, 85]
+  accent: [46, 140, 115]
 
 styles:
 
@@ -59,7 +59,7 @@ styles:
     style_name: List Bullet
     contextual_spacing: false
     space_before: 0
-    space_after: 3
+    space_after: 0
     base_style: normal
 
   heading_1:
