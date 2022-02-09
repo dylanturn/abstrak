@@ -4,6 +4,12 @@
 # I dont know why this one gets to be hex, I'm sorry...
 bullet_color_hex: 2E74B5
 
+page_margins:
+  top: 0.5
+  bottom: 0.5
+  left: 0.5
+  right: 0.5
+
 styles:
 
   # Styles used throughout the document.
@@ -21,15 +27,19 @@ styles:
     subscript: false
     superscript: false
     no_proof: false
+    space_after: 0
+    space_before: 0
 
   normal_accent:
     style_name: Normal Accent
+    font_name: Calibri Light
     style_type: character
     color: [46, 116, 181]
     base_style: normal
 
   normal_emphasis:
     style_name: Normal Emphasis
+    font_name: Calibri Light
     style_type: character
     bold: true
     base_style: normal
@@ -42,12 +52,20 @@ styles:
 
   heading_1:
     style_name: Heading 1
+    font_name: Calibri Light
+    size: 14
     all_caps: true
+    space_after: 0
+    space_before: 10
     base_style: normal_accent
 
   heading_2:
     style_name: Heading 2
+    font_name: Calibri Light
+    size: 11
     all_caps: true
+    space_after: 0
+    space_before: 5
     base_style: normal_accent
 
   # Styles used in the header.
@@ -69,20 +87,20 @@ styles:
   subtitle:
     style_name: Abstrak Subtitle
     style_type: character
-    size: 10
+    size: 11
     base_style: title
 
   subtitle_emphasis:
     style_name: Abstrak Subtitle Emphasis
     style_type: character
     bold: true
-    size: 10
+    size: 11
     base_style: title
 
   subtitle_seperator:
     style_name: Abstrak Subtitle Seperator
     style_type: character
-    size: 10
+    size: 11
     base_style: normal_accent
 
   # Styles used with job roles
@@ -94,17 +112,19 @@ styles:
     all_caps: false
     small_caps: true
     bold: true
+    space_after: 0
+    space_before: 5
     base_style: heading_2
 
   position_subtitle:
     style_name: Abstrak Position Subtitle
     style_type: character
     font_name: Calibri Regular
-    size: 10
+    size: 11
     base_style: normal
 
   position_subtitle_seperator:
     style_name: Abstrak Position Subtitle Seperator
     style_type: character
-    size: 10
+    size: 11
     base_style: normal_accent

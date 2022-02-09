@@ -49,7 +49,6 @@ def build_header(document, header_data):
   # CONTACT INFO
   #####
   build_contacts(header, header_data["contacts"])
-  header.add_run("\n")
   
   return header
 
@@ -92,7 +91,7 @@ def build_contacts(paragraph, contacts):
 #####################
 def build_summary(document, summary_data):
   document.add_paragraph("summary", style="Heading 1")
-  document.add_paragraph(summary_data)
+  document.add_paragraph(summary_data).add_run()
 
 
 ########################
@@ -109,16 +108,20 @@ def build_highlights(document, highlights_data):
     )
 
   # Personal Projects
-  para_break = document.add_paragraph(highlights_data["personal_projects"]["title"], style="Heading 2").insert_paragraph_before()
-  para_break.add_run().add_break(WD_BREAK.COLUMN)
-  para_break.clear()
+  projects_paragraph = document.add_paragraph(highlights_data["personal_projects"]["title"], style="Heading 2")
+  #para_break = projects_paragraph.insert_paragraph_before()
+  #para_break.add_run().add_break(WD_BREAK.COLUMN)
+  #para_break.clear()
   for project in highlights_data["personal_projects"]["projects"]:
     project_paragraph = document.add_paragraph(
-      #f"{project['name']} - {project['url']}",
       style='List Bullet'
     )
     util.add_hyperlink(project_paragraph, project['name'], project['url'])
     project_paragraph.add_run(f" - {project['description']}")
+  
+  #project_paragraph.add_run().add_break()
+  #document.add_paragraph("\n")
+  
 
 
 ###################
@@ -180,7 +183,7 @@ def build_role_positions(document, role_data):
     
     last_position = document.paragraphs[-1]
     last_position.paragraph_format.keep_together = True
-    last_position.paragraph_format.space_after = Pt(5)
+    #last_position.paragraph_format.space_after = Pt(5)
 
 
 if __name__ == "__main__":

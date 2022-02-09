@@ -30,6 +30,9 @@ class AbstrakStyle:
 
 
   def __init__(self, document, style_path="resume-style.yml"):
+
+    self.document = document
+
     with open(style_path, 'r') as stream:
       self.loaded_styles = yaml.safe_load(stream)
 
@@ -51,6 +54,12 @@ class AbstrakStyle:
         doc_base_style = document.styles[style_base["style_name"]]
         doc_style.base_style = doc_base_style
 
+  def load_style_character_format(self, style, doc_style):
+    pass
+  def load_style_paragraph_format(self, style, doc_style):
+    doc_style.paragraph_format.space_before = Pt(self._get_attribute(style, "space_before"))
+    doc_style.paragraph_format.space_after = Pt(self._get_attribute(style, "space_after"))
+
   def load_style(self, document, style):
     # Try get the style, if it doesn't exist we'll make a new one
     try: doc_style = document.styles[style["style_name"]]
@@ -59,6 +68,11 @@ class AbstrakStyle:
         doc_style = document.styles.add_style(style["style_name"], WD_STYLE_TYPE.CHARACTER)
       else:
         doc_style = document.styles.add_style(style["style_name"], WD_STYLE_TYPE.PARAGRAPH)
+      
+    if doc_style.type == WD_STYLE_TYPE.PARAGRAPH:
+      self.load_style_paragraph_format(style, doc_style)
+    else:
+      self.load_style_character_format(style, doc_style)
 
     # font_name: Calibri Light
     doc_style.font.name = self._get_attribute(style, "font_name")
@@ -95,5 +109,5 @@ class AbstrakStyle:
     abstract_id = num_1.abstractNumId.val
     element = document.part.numbering_part.element.xpath(f"//w:abstractNum[@w:abstractNumId={abstract_id}]/w:lvl/w:rPr")[0]
     color = OxmlElement('w:color')
-    color.set(qn('w:val'), color_hex) # 2E74B5
+    color.set(qn('w:val'), color_hex)
     element.insert(0,color)
