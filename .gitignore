@@ -2,6 +2,8 @@
 resume-data.yml
 resume-style.yml
 
+*.ps
+*.pdf
 *.docx
 *.doc
 *.zip
