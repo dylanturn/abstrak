@@ -29,7 +29,7 @@ dylanturnbull@Dylans-MBP abstrak % source venv/bin/activate
 (venv) dylanturnbull@Dylans-MBP abstrak % pip install -r requirements.txt
 
 # Generate a resume!
-(venv) dylanturnbull@Dylans-MBP abstrak $ python src/generate.py example-resume-data.yml example-resume-style.yml example-resume.docx
+(venv) dylanturnbull@Dylans-MBP abstrak $ python src/generate.py examples/example-resume-data.yml examples/example-resume-style.yml examples/example-resume.docx
 ```
 
 ## Example Resume
