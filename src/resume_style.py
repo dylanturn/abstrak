@@ -5,6 +5,7 @@ import yaml
 from docx.oxml.ns import qn
 from docx.enum.style import WD_STYLE_TYPE
 from docx.oxml import OxmlElement
+import util
 
 margins = {
   "top": Inches(0.5),
@@ -36,7 +37,8 @@ class AbstrakStyle:
     with open(style_path, 'r') as stream:
       self.loaded_styles = yaml.safe_load(stream)
 
-    self.configure_bullets(document, self.loaded_styles["bullet_color_hex"])
+    bullet_color_hex = util.rgb_to_hex(self.loaded_styles['colors']['accent'])
+    self.configure_bullets(document, bullet_color_hex)
 
     for style in self.loaded_styles["styles"]:
       self.load_style(document, self.loaded_styles["styles"][style])
@@ -57,8 +59,21 @@ class AbstrakStyle:
   def load_style_character_format(self, style, doc_style):
     pass
   def load_style_paragraph_format(self, style, doc_style):
+
+    # Disable contextual spacing.
+    if not self._get_attribute(style, "contextual_spacing"):
+      pPr = doc_style.element.pPr
+      if pPr:
+        cspacing = pPr.xpath(r'w:contextualSpacing')
+        if len(cspacing) > 0:
+          cspacing = cspacing[0]
+          cspacing.getparent().remove(cspacing)
+
+    doc_style.paragraph_format.line_spacing = self._get_attribute(style, "line_spacing")
+    doc_style.paragraph_format.line_spacing_rule = self._get_attribute(style, "line_spacing_rule")
     doc_style.paragraph_format.space_before = Pt(self._get_attribute(style, "space_before"))
     doc_style.paragraph_format.space_after = Pt(self._get_attribute(style, "space_after"))
+    doc_style.paragraph_format.keep_together = self._get_attribute(style, "keep_together")
 
   def load_style(self, document, style):
     # Try get the style, if it doesn't exist we'll make a new one
@@ -82,7 +97,9 @@ class AbstrakStyle:
 
     # color: ["0x3B", "0x38", "0x38"]
     font_color = self._get_attribute(style, "color")
-    doc_style.font.color.rgb = RGBColor(font_color[0], font_color[1], font_color[2])
+    font_rbg = self.loaded_styles['colors'][font_color]
+    #doc_style.font.color.rgb = RGBColor(font_color[0], font_color[1], font_color[2])
+    doc_style.font.color.rgb = RGBColor(*font_rbg)
     # size: 10
     doc_style.font.size = Pt(self._get_attribute(style, "size"))
     # bold: false

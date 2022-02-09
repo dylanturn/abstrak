@@ -34,7 +34,6 @@ highlights:
     - In pellentesque massa placerat duis ultricies lacus sed turpis
     - Sapien faucibus et molestie ac
     - Quis risus sed vulputate odio ut enim
-    - Lectus mauris ultrices eros in
   personal_projects:
     title: personal projects
     projects:
@@ -50,6 +49,9 @@ highlights:
     - name: Lorem
       url: https://
       description: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+    - name: Adipiscing
+      url: https://
+      description: Eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
 # Job Roles
 roles:

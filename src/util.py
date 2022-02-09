@@ -1,32 +1,26 @@
-from pydoc import doc
 import docx
-from docx.enum.section import WD_SECTION
-from resume_style import margins
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
 import yaml
-from docx.enum.style import WD_STYLE_TYPE
-from docx.shared import Inches
-from docx.shared import RGBColor
-from docx.shared import Pt
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
+from docx.enum.section import WD_SECTION
 from docx.enum.dml import MSO_THEME_COLOR_INDEX
+
 
 def load_resume_data(data_path):
   with open(data_path, 'r') as stream:
       return yaml.safe_load(stream)
 
-#def get_font_style_attribute(style_name, attribute_name):
-#  style = document_fonts.get(style_name, document_fonts.get("default"))
-#  if style:
-#    return style.get(attribute_name, document_fonts.get("default").get(attribute_name))
-#  raise Exception(f"Failed to get attribute {attribute_name} for either the default or {style_name} styles")
+
+def rgb_to_hex(rgb):
+    return '%02x%02x%02x' % tuple(rgb)
 
 
-# def format_font(style, font):
-#   font.name = get_font_style_attribute(style, "name")
-#   font.size = get_font_style_attribute(style, "size")
-#   font.color.rgb = get_font_style_attribute(style, "color")
-#   return font
+def create_element(name):
+    return OxmlElement(name)
+
+
+def create_attribute(element, name, value):
+    element.set(qn(name), value)
 
 
 def insert_standard_section(document):
@@ -65,12 +59,6 @@ def insert_horizontal_rule(paragraph):
     bottom.set(qn('w:color'), '808080')
     pBdr.append(bottom)
 
-
-def create_element(name):
-    return OxmlElement(name)
-
-def create_attribute(element, name, value):
-    element.set(qn(name), value)
 
 def add_page_number(run, type="PAGE", style=None):
     fldChar1 = create_element('w:fldChar')

@@ -1,24 +1,21 @@
-from operator import truediv
 import sys
 import util
 import jmespath
 from docx import Document
-from docx.enum.section import WD_SECTION
-from docx.enum.text import WD_TAB_ALIGNMENT
 from docx.shared import Pt
-from resume_style import margins, AbstrakStyle
-from docx.oxml.ns import qn
 from docx.shared import Inches
-from docx.enum.text import WD_BREAK
-from docx.text.paragraph import Run
+from docx.enum.text import WD_TAB_ALIGNMENT
+from resume_style import margins, AbstrakStyle
 
 
-####################
-###    HEADER    ###
-####################
+#########################
+###   FIRST HEADER    ###
+#########################
 def build_header(document, header_data):
   default_section = document.sections[0]
-  header = default_section.header.paragraphs[0]
+  default_section.different_first_page_header_footer = True
+  first_page_header = default_section.header.paragraphs[0]
+  header= document.sections[0].first_page_header.paragraphs[0]
 
   default_section.top_margin = margins.get("top")
   default_section.right_margin = margins.get("right")
@@ -29,6 +26,12 @@ def build_header(document, header_data):
   city = header_data["location"]["city"]
   state = header_data["location"]["state"]
   zip = header_data["location"]["zip"]
+
+  #####
+  # FIRST PAGE HEADER
+  #####
+  first_page_header.add_run(f"{first} ", style="Abstrak Title")
+  first_page_header.add_run(f"{last}\n", style="Abstrak Title Accent")
 
   #####
   # HEADER TITLE
@@ -49,7 +52,6 @@ def build_header(document, header_data):
   # CONTACT INFO
   #####
   build_contacts(header, header_data["contacts"])
-  
   return header
 
 
@@ -67,8 +69,6 @@ def build_footer(document, footer_data):
   footer_tab_stops = footer_paragraph.paragraph_format.tab_stops
   footer_tab_stops.add_tab_stop(Inches(0), WD_TAB_ALIGNMENT.LEFT)
   footer_tab_stops.add_tab_stop(Inches(7.5), WD_TAB_ALIGNMENT.RIGHT)
-
-
 
 
 # Builds the contact methods in a consistent way for the header and footer.
@@ -108,20 +108,13 @@ def build_highlights(document, highlights_data):
     )
 
   # Personal Projects
-  projects_paragraph = document.add_paragraph(highlights_data["personal_projects"]["title"], style="Heading 2")
-  #para_break = projects_paragraph.insert_paragraph_before()
-  #para_break.add_run().add_break(WD_BREAK.COLUMN)
-  #para_break.clear()
+  document.add_paragraph(highlights_data["personal_projects"]["title"], style="Heading 2")
   for project in highlights_data["personal_projects"]["projects"]:
     project_paragraph = document.add_paragraph(
       style='List Bullet'
     )
     util.add_hyperlink(project_paragraph, project['name'], project['url'])
     project_paragraph.add_run(f" - {project['description']}")
-  
-  #project_paragraph.add_run().add_break()
-  #document.add_paragraph("\n")
-  
 
 
 ###################
@@ -208,8 +201,6 @@ if __name__ == "__main__":
     raise Exception("No header found!")
   header = build_header(document, header_data)
 
-  #util.insert_horizontal_rule(header)
-
   # Try build the summary
   summary_data = resume_data.get("summary")
   if summary_data is None:
@@ -225,7 +216,6 @@ if __name__ == "__main__":
   build_highlights(document, highlights_data)
 
   util.insert_standard_section(document)
-  #util.insert_horizontal_rule(document.add_paragraph())
 
   # Try build the roles
   roles_data = resume_data.get("roles")

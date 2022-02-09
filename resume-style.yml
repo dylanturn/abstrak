@@ -1,14 +1,15 @@
 ---
 # Styles
 
-# I dont know why this one gets to be hex, I'm sorry...
-bullet_color_hex: 2E74B5
-
 page_margins:
   top: 0.5
   bottom: 0.5
   left: 0.5
   right: 0.5
+
+colors:
+  base: [59, 56, 56]
+  accent: [46, 116, 181]
 
 styles:
 
@@ -17,7 +18,7 @@ styles:
     style_name: Normal
     style_type: paragraph
     font_name: Calibri Light
-    color: [59, 56, 56]
+    color: base
     size: 10
     bold: false
     italic: false
@@ -27,14 +28,18 @@ styles:
     subscript: false
     superscript: false
     no_proof: false
-    space_after: 0
-    space_before: 0
+    line_spacing_rule: 5 # Line space as multiples of font size
+    line_spacing: 1    
+    space_before: 3
+    space_after: 3
+    contextual_spacing: true
+    keep_together: true
 
   normal_accent:
     style_name: Normal Accent
     font_name: Calibri Light
     style_type: character
-    color: [46, 116, 181]
+    color: accent
     base_style: normal
 
   normal_emphasis:
@@ -49,6 +54,11 @@ styles:
     style_type: character
     bold: true
     base_style: normal_accent
+
+  list_bullet:
+    style_name: List Bullet
+    contextual_spacing: false
+    base_style: normal
 
   heading_1:
     style_name: Heading 1
@@ -107,7 +117,7 @@ styles:
 
   position_title:
     style_name: Abstrak Position Title
-    color: [59, 56, 56]
+    color: base
     style_type: paragraph
     all_caps: false
     small_caps: true
