@@ -119,6 +119,7 @@ styles:
 
   position_title:
     style_name: Abstrak Position Title
+    font_name: Calibri
     color: base
     style_type: paragraph
     all_caps: true
@@ -131,9 +132,8 @@ styles:
   position_subtitle:
     style_name: Abstrak Position Subtitle
     style_type: character
-    font_name: Calibri Regular
     size: 11
-    base_style: normal
+    base_style: position_title
 
   position_subtitle_seperator:
     style_name: Abstrak Position Subtitle Seperator

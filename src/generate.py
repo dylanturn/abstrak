@@ -60,7 +60,21 @@ def build_header(document, header_data):
 ####################
 def build_footer(document, footer_data):
   default_section = document.sections[0]
+  
   footer_paragraph = default_section.footer.paragraphs[0]
+  footer_paragraph.add_run("\n")
+  build_contacts(footer_paragraph, footer_data["contacts"])
+  footer_paragraph.add_run("\t\t")
+  util.add_page_number(footer_paragraph.add_run(), style=document.styles["Normal Accent Emphasis"])
+  footer_paragraph.add_run("|")
+  util.add_page_number(footer_paragraph.add_run(), "NUMPAGES")
+  footer_tab_stops = footer_paragraph.paragraph_format.tab_stops
+  footer_tab_stops.add_tab_stop(Inches(0), WD_TAB_ALIGNMENT.LEFT)
+  footer_tab_stops.add_tab_stop(Inches(7.5), WD_TAB_ALIGNMENT.RIGHT)
+
+  
+  footer_paragraph= document.sections[0].first_page_footer.paragraphs[0]
+  footer_paragraph.add_run("\n")
   build_contacts(footer_paragraph, footer_data["contacts"])
   footer_paragraph.add_run("\t\t")
   util.add_page_number(footer_paragraph.add_run(), style=document.styles["Normal Accent Emphasis"])

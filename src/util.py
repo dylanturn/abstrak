@@ -21,6 +21,7 @@ def create_element(name):
 
 def create_attribute(element, name, value):
     element.set(qn(name), value)
+    return element
 
 
 def insert_standard_section(document):

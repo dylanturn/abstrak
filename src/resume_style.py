@@ -94,6 +94,11 @@ class AbstrakStyle:
     rFonts = doc_style.element.rPr.rFonts
     if rFonts:
       rFonts.set(qn("w:asciiTheme"), self._get_attribute(style, "font_name"))
+    else:
+      rFonts = util.create_element("w:rFonts")
+      util.create_attribute(rFonts, "w:asciiTheme", self._get_attribute(style, "font_name"))
+      doc_style.element.rPr.insert(0,rFonts)
+
 
     # color: ["0x3B", "0x38", "0x38"]
     font_color = self._get_attribute(style, "color")
