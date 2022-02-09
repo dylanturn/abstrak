@@ -80,7 +80,7 @@ def add_page_number(run, type="PAGE", style=None):
 
 
 
-def add_hyperlink(paragraph, text, url):
+def add_hyperlink(paragraph, text, url, link_style):
     # This gets access to the document.xml.rels file and gets a new relation id value
     part = paragraph.part
     r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
@@ -99,12 +99,12 @@ def add_hyperlink(paragraph, text, url):
     hyperlink.append(new_run)
 
     # Create a new Run object and add the hyperlink into it
-    r = paragraph.add_run ()
+    r = paragraph.add_run(style = link_style)
     r._r.append (hyperlink)
 
     # A workaround for the lack of a hyperlink style (doesn't go purple after using the link)
     # Delete this if using a template that has the hyperlink style in it
-    r.font.color.theme_color = MSO_THEME_COLOR_INDEX.HYPERLINK
-    r.font.underline = True
+    #r.font.color.theme_color = MSO_THEME_COLOR_INDEX.HYPERLINK
+    #r.font.underline = True
 
     return hyperlink

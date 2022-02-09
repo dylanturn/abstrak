@@ -118,23 +118,23 @@ def build_highlights(document, highlights_data):
   for skill in highlights_data["skillset"]["skills"]:
     document.add_paragraph(
       skill,
-      style='List Bullet'
+      style='Abstrak Position List Bullet'
     )
 
   last_position = document.paragraphs[-1]
-  last_position.style = 'Abstrak Position List Bullet Last'
+  last_position.style = "Abstrak Position List Bullet Last"
 
   # Personal Projects
   document.add_paragraph(highlights_data["personal_projects"]["title"], style="Heading 2")
   for project in highlights_data["personal_projects"]["projects"]:
     project_paragraph = document.add_paragraph(
-      style='List Bullet'
+      style='Abstrak Position List Bullet'
     )
-    util.add_hyperlink(project_paragraph, project['name'], project['url'])
+    util.add_hyperlink(project_paragraph, project['name'], project['url'], "Abstrak Link")
     project_paragraph.add_run(f" - {project['description']}")
 
   last_position = document.paragraphs[-1]
-  last_position.style = 'Abstrak Position List Bullet Last'
+  last_position.style = "Abstrak Position List Bullet Last"
 
 ###################
 ###    ROLES    ###
@@ -142,13 +142,13 @@ def build_highlights(document, highlights_data):
 def build_roles(document, role_data):
   
   # Try build the volunteer roles
-  document.add_paragraph("volunteer work", style="Heading 1")
   volunteer_role_expression = jmespath.compile("[?type=='volunteer']")
   volunteer_roles = volunteer_role_expression.search(role_data)
-  for role in volunteer_roles:
-    build_role_positions(document, role)
-
-  util.insert_standard_section(document)
+  if len(volunteer_roles) > 0:
+    document.add_paragraph("volunteer work", style="Heading 1")
+    for role in volunteer_roles:
+      build_role_positions(document, role)
+    util.insert_standard_section(document)
 
   # Try build the professional roles
   document.add_paragraph("experience", style="Heading 1")
@@ -189,16 +189,18 @@ def build_role_positions(document, role_data):
 
     position_paragraph.paragraph_format.space_after = Pt(1)
     # Position Responsibilitites with acomplishments first
-    for item in position["accomplishments"]+position["duties"]:
-      document.add_paragraph(
-        item,
-        style='Abstrak Position List Bullet'
-      )
-    
-    last_position = document.paragraphs[-1]
-    last_position.style = 'Abstrak Position List Bullet Last'
-    #last_position.paragraph_format.keep_together = True
-    #last_position.paragraph_format.space_after = Pt(5)
+    position_items = position["accomplishments"]+position["duties"]
+    if len(position_items) > 0:
+      for item in position_items:
+        document.add_paragraph(
+          item,
+          style='Abstrak Position List Bullet'
+        )
+      
+      last_position = document.paragraphs[-1]
+      last_position.paragraph_format.keep_together = True
+      last_position.style = "Abstrak Position List Bullet Last"
+      #last_position.paragraph_format.space_after = Pt(5)
 
 
 if __name__ == "__main__":
